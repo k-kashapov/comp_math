@@ -92,8 +92,14 @@ def main():
         print(func_list[func])
         plt.xscale('log')
         plt.yscale('log')
+        plt.grid()
+
+        plt.title(func_list[func])
+        plt.ylabel("Error")
+        plt.xlabel("Step")
+
         for i in range(5):
-            plt.plot(hs, errors[func][i], ms=5.0)
+            plt.plot(hs, errors[func][i], '.-', ms=5.0)
         plt.savefig("img/"+func_list[func])
         plt.clf()
 
