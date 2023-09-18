@@ -30,7 +30,7 @@ def cossin_tgt(x: float) -> float:
     return -math.sin(math.sin(x)) * math.cos(x)
 
 def expsincos_tgt(x: float) -> float:
-    return cossin_tgt(x) * expsincos(x)
+    return -math.sin(x) * math.cos(math.cos(x)) * expsincos(x)
 
 def ln3_tgt(x: float) -> float:
     return 1.0 / (x + 3)
@@ -69,7 +69,7 @@ def calc_h(n: int) -> float:
 
 # ==========< main >===========
 def main():
-    x: float = 0.2
+    x: float = 4.0
     
     print(f"x = {x:3.4f}. Calculating...\n")
 
