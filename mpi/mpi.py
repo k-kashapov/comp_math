@@ -29,37 +29,18 @@ def gauss_direct(matrix, f):
         max_idx: int = np.argmax(abs(matrix[col:rows, col]))
         max_idx += col
 
-        # print(f"\nFound max at: {col}, {max_idx}\n")
-        # print(matrix, "\n")
-
         if col != max_idx:
             matrix[[col, max_idx]] = matrix[[max_idx, col]]
             f[col], f[max_idx] = f[max_idx], f[col]
-            # print("After swapping:\n", matrix)
-            # print(f, "\n")
-
-        # print(f"Before div: {f[col]}")
-        # print(f"Divisor   : {matrix[col][col]}")
 
         f[col]      /= matrix[col][col]
         matrix[col] /= matrix[col][col]
 
-        # print("After division:\n", matrix)
-        # print(f, "\n")
-
         for row in range(col + 1, rows):
             if matrix[row][col] != 0:
                 mult = matrix[row][col]
-                # print("Before:     ", f[row])
-                # print("Subtracting:", f[col] * mult)
                 f[row] -= f[col] * mult
                 matrix[row] -= matrix[col] * mult
-                # print("After:      ", f[row])
-                # print()
-
-        # print(matrix)
-        # print(f)
-        # print()
 
     return matrix
 
@@ -80,32 +61,140 @@ def gauss_inverse(matrix, f):
 
     return matrix
 
+# ===========< Gauss >=============
+def GaussSolution(matrix, f):
+    x = np.copy(f)
+    gauss_res = gauss_direct(np.copy(matrix), x)
+
+    # print("\nAfter direct gauss:")
+    # print(gauss_res)
+    # print(x)
+
+    # print("\nAfter inverse:")
+    gauss_res = gauss_inverse(gauss_res, x)
+    # print(gauss_res)
+    print("\nSolution:\n", x)
+    return x
+
+# =======< LU-decomposition >==========
+def LU(matrix, f):
+    print("LU-decomposition")
+
+    P, L, U = sci.linalg.lu(matrix)
+    # print("L = \n", L)
+    # print("U = \n", U)
+
+    y = np.copy(f)
+    L_res = gauss_direct(L, y)
+
+    # print("L after gauss:\n", L)
+    # print("y after gauss:\n", y)
+
+    U_res = gauss_inverse(U, y)
+    # print("U after gauss inverse:\n", U)
+    # print("y after gauss inverse:\n", y)
+
+    print("\nSolution:\n", y)
+    return y
+
+def mpi(matrix, f, B, F, x0):
+    err = np.linalg.norm(matrix@x0 - f)
+    errors = []
+
+    while err > 1e-9:
+        x0 = -B@x0 + F
+        err = np.linalg.norm(matrix@x0 - f)
+        errors.append(err)
+
+    return x0, errors
+
+# ==========< Gauss-Seidel >============
+def seidel(matrix, f):
+    print("Seidel Method")
+    x = np.copy(f) / 20
+
+    L = np.copy(matrix)
+    U = np.zeros(matrix.shape)
+    
+    for row in range(len(f)):
+        for col in range(row + 1, len(f)):
+            L[row][col] = 0
+            U[row][col] = matrix[row][col]
+
+    # print("seidel L =\n", L)
+    # print("seidel U =\n", U)
+
+    B = np.linalg.inv(L)@U
+    F = np.linalg.inv(L)@f
+
+    # print("B = L^-1 @ U:\n", B)
+
+    x, errors = mpi(matrix, f, B, F, x)
+
+    plt.yscale('log')
+    plt.grid()
+    plt.title("Seidel Method Error")
+    plt.ylabel("Error")
+    plt.xlabel("Step")
+
+    plt.plot(errors, '.b-')
+    plt.savefig("SeidelErrors.jpg")
+    plt.clf()
+
+    print("Seidel Method errors plotted")
+
+def jacobi(matrix, f):
+    print("Jacobi method")
+    x = np.copy(f)
+
+    D = np.zeros(matrix.shape)
+    Oth = np.copy(matrix)
+
+    for i in range(len(f)):
+        D[i][i] = matrix[i][i]
+        Oth[i][i] = 0
+
+    B = np.linalg.inv(D) @ Oth
+    F = np.linalg.inv(D) @ f
+
+    x, errors = mpi(matrix, f, B, F, x)
+
+    plt.yscale('log')
+    plt.grid()
+    plt.title("Jacobi Method Error")
+    plt.ylabel("Error")
+    plt.xlabel("Step")
+
+    plt.plot(errors, '.b-')
+    plt.savefig("JacobiErrors.jpg")
+    plt.clf()
+
+    print("Jacobi Method errors plotted")
+
+def relax(matrix, f):
+    pass
+
 def main():
     np.set_printoptions(floatmode='maxprec', precision=3, suppress=True)
     matrix, f = gen_matrix(100)
-    x = np.copy(f)
     
     print("\nInput:")
     print(matrix)
-    print(x)
+    print(f)
 
-    gauss_res = gauss_direct(np.copy(matrix), x)
+    x = GaussSolution(matrix, f)
+    y = LU(matrix, f)
 
-    print("\nAfter direct gauss:")
-    print(gauss_res)
-    print(x)
-
-    print("\nAfter inverse:")
-    gauss_res = gauss_inverse(gauss_res, x)
-    print(gauss_res)
-    print("\nSolution:\n", x)
-
-    print("\nFinished")
-
-    print("\nChecking if the answer is correct:")
+    print("\nChecking if the Gauss answer is correct:")
     print("Ax should be equal to initial f:")
-    test = np.isclose(matrix@x, f)
-    print(f"(matrix @ x)[i] == f[i]:\n{test}")
+    test = matrix@x - f
+    print(f"|(matrix @ x) - f)|:\n\t{np.linalg.norm(test)}")
+
+    print("\nChecking if the LU answer is correct:")
+    print(f"|(x - y)|:\n\t{np.linalg.norm(x - y)}")
+
+    seidel(matrix, f)
+    jacobi(matrix, f)
 
 if __name__ == "__main__":
     main()
