@@ -104,6 +104,7 @@ def mpi(matrix, f, B, F, x0):
     while err > 1e-9:
         x0 = -B@x0 + F
         err = np.linalg.norm(matrix@x0 - f)
+        # print(err)
         errors.append(err)
 
     return x0, errors
@@ -172,7 +173,42 @@ def jacobi(matrix, f):
     print("Jacobi Method errors plotted")
 
 def relax(matrix, f):
-    pass
+    print("Relaxation Method")
+    x = np.copy(f) * 20
+
+    L = np.copy(matrix)
+    D = np.zeros(matrix.shape)
+    U = np.zeros(matrix.shape)
+    
+    for row in range(len(f)):
+        for col in range(row + 1, len(f)):
+            L[row][col] = 0
+            U[row][col] = matrix[row][col]
+        D[row][row] = matrix[row][row]
+        L[row][row] = 0
+
+    print("Relax L =\n", L)
+    print("Relax D =\n", D)
+    print("Relax U =\n", U)
+
+    w = 1.2
+
+    B = np.linalg.inv(D + w*U) @ ((w-1)*D + w*L)
+    F = w*np.linalg.inv(D + w*U) @ f
+
+    x, errors = mpi(matrix, f, B, F, x)
+
+    plt.yscale('log')
+    plt.grid()
+    plt.title("Relaxation Method Error")
+    plt.ylabel("Error")
+    plt.xlabel("Step")
+
+    plt.plot(errors, '.b-')
+    plt.savefig("RelaxationErrors.jpg")
+    plt.clf()
+
+    print("Relaxation Method errors plotted")
 
 def main():
     np.set_printoptions(floatmode='maxprec', precision=3, suppress=True)
@@ -195,6 +231,7 @@ def main():
 
     seidel(matrix, f)
     jacobi(matrix, f)
+    relax (matrix, f)
 
 if __name__ == "__main__":
     main()
