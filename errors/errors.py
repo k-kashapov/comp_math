@@ -41,7 +41,7 @@ def power_tgt(x: float) -> float:
 # ========< Formulae >=========
 def formula1(func: str, x: float, h: float) -> float:
     return (eval(func)(x + h) - eval(func)(x)) / h
-
+    
 def formula2(func: str, x: float, h: float) -> float:
     return (eval(func)(x) - eval(func)(x - h)) / h
 
