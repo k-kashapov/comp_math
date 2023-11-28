@@ -55,13 +55,21 @@ def GaussSolution(matrix, f):
     print("\nSolution:\n", x)
     return x
 
-def coefs(c, a, i, h):
-    # print(len(c), len(a), i, h)
+def div_diff(xs, ys, k_start, k_end):
+    if k_start == k_end:
+        return ys[k_start]
+    return (div_diff(xs, ys, k_start + 1, k_end) - div_diff(xs, ys, k_start, k_end-1)) / (xs[k_end] - xs[k_start])
+
+# Warning: i >= 1
+def u(xs, ys, i):
+    return (div_diff(xs, ys, i, i + 1) - div_diff(xs, ys, i - 1, i)) / (xs[i + 1] - xs[i - 1])
+
+def coefs(c, a, i, h, xs, ys):
     coefs = np.zeros(4)
     coefs[0] = a[i]
-    coefs[1] = (a[i+1] - a[i]) / h - (2 * c[i] + c[i + 1]) / 3 * h
+    coefs[1] = c[i] * h / 3 + c[i - 1] / 6 * h + div_diff(xs, ys, i - 1, i)
     coefs[2] = c[i]
-    coefs[3] = (c[i+1] - c[i]) / 3 / h
+    coefs[3] = (c[i] - c[i - 1]) / h
     return coefs
 
 def Spline(xs, ys, x_tgt, c, h):
@@ -71,56 +79,53 @@ def Spline(xs, ys, x_tgt, c, h):
     for j in range(len(xs)):
         if x_tgt <= xs[j]:
             xi = xs[j]
-            i = j - 1
+            i = j
             break
 
-    # print(x_tgt, xs[i])
+    coeffs = coefs(c, ys, i, h, xs, ys)
 
-    coeffs = coefs(c, ys, i, h)
-
-    return coeffs[0] + coeffs[1] * (x_tgt - xi) + coeffs[2] * (x_tgt - xi)**2 + (coeffs[3]) * (x_tgt - xi)**3
+    return coeffs[0] + coeffs[1] * (x_tgt - xi) + (coeffs[2] / 2) * (x_tgt - xi)**2 + (coeffs[3] / 6) * (x_tgt - xi)**3
 
 def main():
     np.set_printoptions(floatmode='maxprec', precision=3, suppress=True)
     years      = [1910., 1920., 1930., 1940., 1950., 1960., 1970., 1980., 1990., 2000.]
     population = [92228496., 106021537., 123202624., 132164569., 151325798., 179323175., 203211926., 226545805., 248709873., 281421906.]
 
-    cs = np.zeros((len(years) - 2, len(years) - 2))
+    n = len(years) - 2
+    cs = np.zeros((n, n))
     h = years[1] - years[0]
-    rs = np.zeros(len(years) - 2)
+    rs = np.zeros(n)
 
-    for i in range(0, len(years) - 2):
+    for i in range(0, n):
+        rs[i] = 6 * u(years, population, i)
+        if i < n - 1:
+            cs[i + 1][i] = 0.5
+        cs[i][i] = 2
         if i > 0:
-            rs[i - 1] = 3/h/h * (population[i + 1] - 2*population[i - 1] + population[i - 1])
-            cs[i][i - 1] = 1
-        cs[i][  i  ] = 4
-        if i < len(years) - 3:
-            cs[i][i + 1] = 1
-
-    print(cs)
+            cs[i - 1][i] = 0.5
 
     c = GaussSolution(cs, rs)
-    c = np.insert(c, 0, 0)
-    c = np.append(c, 0)
 
+    c = np.append(c, 0)
+    c = np.insert(c, 0, 0)
     print(c)
 
-    x_plt = np.arange(1910, 2000, 1)
+    x_plt = np.arange(1910, 2001, 1)
     y_plt = []
     for x in x_plt:
-        # print(x, end="\r")
         y_plt.append(Spline(years, population, x, c, h))
 
     plt.plot(x_plt, y_plt, '.-')
     plt.scatter(years, population)
     plt.grid()
     
+    # plt.yscale('log')
     plt.title("Values, Spline")
     plt.ylabel("Population")
     plt.xlabel("Year")
 
     # plt.show()
-    plt.savefig("img/SplineValue.png")
+    plt.savefig("img/SplineBest.png")
 
 if __name__ == "__main__":
     main()

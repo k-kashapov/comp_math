@@ -2,6 +2,7 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
+import math
 
 def gauss_direct(matrix, f):
     rows, cols = matrix.shape
@@ -59,19 +60,25 @@ def func(x, coefs):
     x_n = 1
     ret = 0
     for i in range(len(coefs) - 1, -1, -1):
-        # print(ret, x_n, coefs[i])
         ret += coefs[i] * x_n
         x_n *= x
 
     return ret
 
-# approx with ax^3 + bx^2 + cx + d
+def func2(x, coefs):
+    ret = 0
+    for i in range(len(coefs) - 1, -1, -1):
+        ret += math.exp(coefs[i] * x)
+
+    return ret
+
+# approx with P_power(x)
 def main():
     np.set_printoptions(floatmode='maxprec', suppress=True)
     years      = [1910., 1920., 1930., 1940., 1950., 1960., 1970., 1980., 1990., 2000.]
     population = [92228496., 106021537., 123202624., 132164569., 151325798., 179323175., 203211926., 226545805., 248709873., 281421906.]
 
-    power = 46
+    power = 3
 
     n = len(years)
     
