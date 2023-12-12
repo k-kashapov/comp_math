@@ -73,8 +73,8 @@ def coefs(c, a, i, h, xs, ys):
     return coefs
 
 def Spline(xs, ys, x_tgt, c, h):
-    xi = 0
-    i = 0
+    i = len(ys) - 1
+    xi = xs[i]
 
     for j in range(len(xs)):
         if x_tgt <= xs[j]:
@@ -110,7 +110,7 @@ def main():
     c = np.insert(c, 0, 0)
     print(c)
 
-    x_plt = np.arange(1910, 2001, 1)
+    x_plt = np.arange(1910, 2020, 1)
     y_plt = []
     for x in x_plt:
         y_plt.append(Spline(years, population, x, c, h))

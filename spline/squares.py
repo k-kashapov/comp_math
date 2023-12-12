@@ -45,15 +45,7 @@ def gauss_inverse(matrix, f):
 def GaussSolution(matrix, f):
     x = np.copy(f)
     gauss_res = gauss_direct(np.copy(matrix), x)
-
-    # print("\nAfter direct gauss:")
-    # print(gauss_res)
-    # print(x)
-
-    # print("\nAfter inverse:")
     gauss_res = gauss_inverse(gauss_res, x)
-    # print(gauss_res)
-    print("\nSolution:\n", x)
     return x
 
 def func(x, coefs):
@@ -62,13 +54,6 @@ def func(x, coefs):
     for i in range(len(coefs) - 1, -1, -1):
         ret += coefs[i] * x_n
         x_n *= x
-
-    return ret
-
-def func2(x, coefs):
-    ret = 0
-    for i in range(len(coefs) - 1, -1, -1):
-        ret += math.exp(coefs[i] * x)
 
     return ret
 
