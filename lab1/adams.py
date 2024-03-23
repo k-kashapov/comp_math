@@ -28,9 +28,8 @@ def main():
     plot_radius = 100
     u0 = [1.0, 0.0]
 
-    f_arr = []
-
     for point in range(800):
+        f_arr = []
         u = [u0[0] + rnd_size * rnd.randrange(-500, 500), u0[1] + rnd_size * rnd.randrange(-500, 500)]
         x_arr = np.array([u[0]])
         y_arr = np.array([u[1]])
@@ -64,7 +63,6 @@ def main():
     plt.xlabel("x")
 
     plt.show()
-    # plt.savefig("jojo.png")
 
 if __name__ == "__main__":
     main()

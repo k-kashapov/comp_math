@@ -66,16 +66,11 @@ def main():
 
     print("\nDone")
 
-    # plt.xticks(np.linspace(u0[0] - rnd_size * 4, u0[0] + rnd_size * 4, 15))
-    # plt.yticks(np.linspace(u0[1] - rnd_size * 4, u0[1] + rnd_size * 4, 15))
-
-    # plt.yscale('log')
     plt.title("Phase trajectory")
     plt.ylabel("y")
     plt.xlabel("x")
 
     plt.show()
-    # plt.savefig("jojo.png")
 
 if __name__ == "__main__":
     main()
