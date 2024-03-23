@@ -46,8 +46,11 @@ def fdn_next_u(alpha_arr, beta, tau, func, u_arr):
     u_last = u_arr[-1]
     delta = (alpha_arr[2] * u_last + alpha_arr[1] * u_arr[-2] + alpha_arr[0] * u_arr[-3])
     gamma = tau * beta
-
     u_new = gamma * f(u_last) + delta
+
+    while (np.linalg.norm(u_last - u_new) > 1e-4):
+        u_last = u_new
+        u_new = gamma * f(u_last) + delta
 
     return u_new
 
