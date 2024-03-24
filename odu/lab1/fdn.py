@@ -54,12 +54,6 @@ def fdn_next_u(alpha_arr, beta, tau, func, u_arr):
 
     return u_new
 
-def lor_system(t, y):
-    x, y, = y
-    dxdt = y
-    dydt = x * x - 1
-    return np.array([dxdt, dydt])
-
 def main():
     np.set_printoptions(floatmode='maxprec', suppress=True)
     tau = 1e-3
@@ -83,10 +77,9 @@ def main():
         res = next_u_2(last_u, tau, u_arr)
         u_arr.append(res)
 
-        for jojo in range(10):
-            last_u = np.copy(res)
-            res = next_u_3(last_u, tau, u_arr)
-            u_arr.append(res)
+        last_u = np.copy(res)
+        res = next_u_3(last_u, tau, u_arr)
+        u_arr.append(res)
 
         for t in range(900):
             res = fdn_next_u(alpha_arr, beta, tau, f, u_arr)
